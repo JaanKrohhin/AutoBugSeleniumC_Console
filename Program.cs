@@ -2,9 +2,12 @@
 using OpenQA.Selenium;
 using OpenQA.Selenium.Edge;
 using OpenQA.Selenium.Support.UI;
+using SeleniumExtras.WaitHelpers;
 using System;
 using System.Collections.Generic;
 using System.Threading;
+Console.WriteLine("Choose test: \n 1 - Test Buy \n 2 - Test Compariosn \n 3 - Test Search  + Buy \n 4 - Test Account \n 5 - All test at the same time");
+int choose = Convert.ToInt32(Console.ReadLine());
 
 Console.WriteLine("Hello testers");
 LogHelpers.CheckDirectoryExists();
@@ -21,8 +24,31 @@ foreach (var item in emails)
 {
     try
     {
-        new Thread(() => TestSite(item, i++, filepath)).Start();
-        new Thread(() => Comparison(i++)).Start();
+        switch (choose)
+        {
+            case 1:
+                new Thread(() => TestSite(item, i++, filepath)).Start();
+                break;
+            case 2:
+                new Thread(() => Comparison(i++)).Start();
+                break;
+            case 3:
+                new Thread(() => Test_buy(i++)).Start();
+                break;           
+            case 4:
+                new Thread(() => Test_account(i++)).Start();
+                break;
+            case 5:
+                new Thread(() => TestSite(item, i++, filepath)).Start();
+                new Thread(() => Comparison(i++)).Start();
+                new Thread(() => Test_buy(i++)).Start();
+                new Thread(() => Test_account(i++)).Start();
+                break;
+        }
+
+  
+
+
     }
     catch (Exception e)
     {
@@ -165,8 +191,140 @@ void TestSite(string email, int testNumber,string filepath)
         }
     } while (LogHelpers.EndAllTests);
 }
-#endregion
-IWebDriver DriverSetup()
+ void Test_buy(int testNumber)
+{
+    LogHelpers log = new LogHelpers(filepath);
+    log.CreateLogFile(testNumber);
+    log.Info("Start Search and Buy testing, test number: " + testNumber);
+
+
+
+
+
+    do
+    {
+        try
+
+        {
+            using (IWebDriver driver = DriverSetup()) {
+                WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(20));
+                log.Info("test test test test");
+            driver.Navigate().GoToUrl("https://hgdft53.frog.ee/en/");
+            var search = driver.FindElement(By.Id("search_query_top"));
+            search.SendKeys("Xiaomi SKV4140GL");
+                Thread.Sleep(1300);
+                search.Submit();
+
+
+            Thread.Sleep(300);
+
+            var item = driver.FindElement(By.XPath("/html/body/div[2]/div[2]/div/div/div[2]/div[2]/ul/li/div/div/div[2]/div[4]/ul/li/a"));
+            item.Click();
+            var cart = driver.FindElement(By.CssSelector(".justify_center"));
+            Thread.Sleep(1500);
+            wait.Until(driver => ExpectedConditions.ElementToBeClickable(cart));
+            Thread.Sleep(100);
+            cart.Click();
+
+
+             wait.Until(ExpectedConditions.ElementToBeClickable(By.Id("opc_guestCheckout")));
+            Thread.Sleep(100);
+            var guest = driver.FindElement(By.Id("opc_guestCheckout"));
+            wait.Until(driver => ExpectedConditions.ElementToBeClickable(guest));
+            guest.Click();
+            Thread.Sleep(100);
+
+            var email = driver.FindElement(By.Id("email"));
+            email.SendKeys("Oleg123@gmail.com");
+
+            var fname = driver.FindElement(By.Id("firstname"));
+            fname.SendKeys("Oleg");
+
+            var sname = driver.FindElement(By.Id("lastname"));
+            sname.SendKeys("Prokofev");
+            Thread.Sleep(100);
+
+            var submit = driver.FindElement(By.Id("submitGuestAccount"));
+            submit.Click();
+
+            wait.Until(ExpectedConditions.ElementToBeClickable(By.Id("contact_phone")));
+            wait.Until(driver => ((IJavaScriptExecutor)driver).ExecuteScript("return document.readyState").Equals("complete"));
+            Thread.Sleep(2000);
+
+            var phone = driver.FindElement(By.Id("contact_phone"));
+            phone.Click();
+            phone.SendKeys("58332449");
+            phone.Submit();
+            Thread.Sleep(1000);
+
+            var drop = driver.FindElement(By.Id("id_state_delivery"));
+            drop.SendKeys("r");
+            drop.Submit();
+            Thread.Sleep(3000);
+
+                wait.Until(ExpectedConditions.ElementToBeClickable(By.Id("submitAddressInvoice")));
+            wait.Until(ExpectedConditions.ElementToBeClickable(By.Id("submitAddressInvoice")));
+            Thread.Sleep(1000);
+            wait.Until(driver => ((IJavaScriptExecutor)driver).ExecuteScript("return document.readyState").Equals("complete"));
+            Thread.Sleep(1000);
+            var end = driver.FindElement(By.Id("submitAddressInvoice"));
+            end.Click();
+                Thread.Sleep(10000);
+                wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementExists(By.XPath("/html/body/div[2]/div[2]/div/div/div[2]/div[5]/div[3]/div[3]/div/div/div[2]/div[2]/div[1]/div/div/button")));
+                Thread.Sleep(100);
+            wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("/html/body/div[2]/div[2]/div/div/div[2]/div[5]/div[3]/div[3]/div/div/div[2]/div[2]/div[1]/div/div/button")));
+            wait.Until(driver => ((IJavaScriptExecutor)driver).ExecuteScript("return document.readyState").Equals("complete"));
+
+            var end2 = driver.FindElement(By.XPath("/html/body/div[2]/div[2]/div/div/div[2]/div[5]/div[3]/div[3]/div/div/div[2]/div[2]/div[1]/div/div/button"));
+            end2.Click();
+            Thread.Sleep(1000);
+
+            wait.Until(ExpectedConditions.ElementToBeClickable(By.CssSelector("#PaymentsItems > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > a:nth-child(1)")));
+            wait.Until(driver => ((IJavaScriptExecutor)driver).ExecuteScript("return document.readyState").Equals("complete"));
+
+            var pay = driver.FindElement(By.CssSelector("#PaymentsItems > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > a:nth-child(1)"));
+            pay.Click();
+
+            wait.Until(driver => driver.FindElement(By.Id("orderSubmit")));
+            var end3 = driver.FindElement(By.Id("orderSubmit"));
+            end3.Click();
+        }
+        }
+        catch (Exception e)
+        {
+            log.WriteToFile("Error " + e.ToString());
+        }
+    } while (LogHelpers.EndAllTests);
+
+
+}
+void Test_account(int testNumber)
+{
+    LogHelpers log = new LogHelpers(filepath);
+    log.CreateLogFile(testNumber);
+    log.Info("Start Account testing, test number: " + testNumber);
+    do
+    {
+        try
+
+        {
+            using (IWebDriver driver = DriverSetup())
+            {
+
+                //код сюда ролан <---
+
+
+            }
+        }
+        catch (Exception e)
+        {
+            log.WriteToFile("Error " + e.ToString());
+        }
+    }
+    while (LogHelpers.EndAllTests);
+}
+    #endregion
+    IWebDriver DriverSetup()
 {
     IWebDriver driver = new EdgeDriver();
     driver.Manage().Window.Maximize();
