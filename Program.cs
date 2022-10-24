@@ -12,9 +12,8 @@ int numberOfTests = GetNumberFromUser("Type in a number between 0 and 13");
 List<string> emails = GetEmails(numberOfTests);
 Console.WriteLine("Your emails:");
 emails.ForEach(Console.WriteLine);
-Console.WriteLine("\nPress enter to start the program");
+Console.WriteLine("\nPress ENTER to start the program. Once started, press ENTER again to stop finish testing.\nThe program will close after it finishes the current tests");
 Console.ReadLine();
-Console.WriteLine("The program will close after it finishes the tests");
 int i = 1;
 foreach (var item in emails)
 {
