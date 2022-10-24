@@ -1,0 +1,53 @@
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
+
+namespace AutoBugSelenium
+{
+    public class LogHelpers
+    {
+
+        public StreamWriter? stream;
+        public static bool EndAllTests = true;
+        public string folderpath { get; set; }
+        public string? filepath;
+        public LogHelpers(string folderpath)
+        {
+            this.folderpath = folderpath;
+        }
+
+        public void CreateLogFile(int i)
+        {
+            filepath = folderpath + @"\Test" + i.ToString() + ".log";
+            stream = File.AppendText(filepath);
+        }
+
+        public void WriteToFile(string Message)
+        {
+            stream.WriteLine("{0} {1} {2}", DateTime.Now.ToLongTimeString(), DateTime.Now.ToLongDateString(), Message);
+            stream.Flush();
+        }
+
+
+        //Static functions
+        public static void CheckDirectoryExists()
+        {
+            string filePath = @"Logs\";
+
+            if (!Directory.Exists(filePath))
+            {
+                Directory.CreateDirectory(filePath);
+                Console.WriteLine("Directry 'Logs' Created");
+            }
+
+        }
+        public static string CreateFolderForSession()
+        {
+            string filePath = string.Format(@"Logs\session_{0:yyyy_mm_dd_hh_mm_ss}", DateTime.Now);
+            Directory.CreateDirectory(filePath);
+            return filePath;
+        }
+
+    }
+}
