@@ -36,13 +36,13 @@ foreach (var item in emails)
                 new Thread(() => Test_buy(i++)).Start();
                 break;           
             case 4:
-                new Thread(() => Test_account(i++)).Start();
+                new Thread(() => Test_account(i++, item)).Start();
                 break;
             case 5:
                 new Thread(() => TestSite(item, i++, filepath)).Start();
                 new Thread(() => Comparison(i++)).Start();
                 new Thread(() => Test_buy(i++)).Start();
-                new Thread(() => Test_account(i++)).Start();
+                new Thread(() => Test_account(i++, item)).Start();
                 break;
         }
 
@@ -198,9 +198,6 @@ void TestSite(string email, int testNumber,string filepath)
     log.Info("Start Search and Buy testing, test number: " + testNumber);
 
 
-
-
-
     do
     {
         try
@@ -298,11 +295,71 @@ void TestSite(string email, int testNumber,string filepath)
 
 
 }
-void Test_account(int testNumber)
+
+void Test_account(int testNumber, string email)
 {
     LogHelpers log = new LogHelpers(filepath);
     log.CreateLogFile(testNumber);
     log.Info("Start Account testing, test number: " + testNumber);
+    List<string> months = new List<string>()
+                {
+                    "С",
+                    "О",
+                    "Н",
+                    "Д"
+                };
+
+    List<string> years = new List<string>(){
+                        "2000",
+                        "2001",
+                        "2002",
+                        "2003",
+                        "2004",
+                        "2005"
+                };
+
+    Random rnd = new Random();
+
+    //registration
+    var sighInButton = By.CssSelector(".tm_header_user_info");
+    var registerButton = By.CssSelector(".create");
+    var GenderRadiobutton = By.CssSelector("#id-gender1");
+    var nameTextBox = By.CssSelector("#customer-firstname");
+    var lastnameTextBox = By.CssSelector("#customer-lastname");
+    var emailTextBox = By.CssSelector("#email-create");
+    var passwordTextBox = By.CssSelector("#passwd-create");
+    var SelectBirthDay = By.CssSelector("#header-login > ul > li.create-account-content > form > div.account_creation > div:nth-child(6) > div > div:nth-child(1) > select");
+    var SelectBirthMonth = By.CssSelector("#header-login > ul > li.create-account-content > form > div.account_creation > div:nth-child(6) > div > div.col-xs-6 > select");
+    var SelectBirthYear = By.CssSelector("#header-login > ul > li.create-account-content > form > div.account_creation > div:nth-child(6) > div > div:nth-child(3) > select");
+    var Subscribe = By.CssSelector("#newsletter-tmha");
+    var Apply = By.CssSelector("#header-login > ul > li.create-account-content > form > div.submit.clearfix > p.submit > button");
+
+
+    //Deleteing account
+    var Account = By.CssSelector("span.button-labels:nth-child(1)");
+    var DeleteAccount = By.CssSelector(".onecolumn > ul:nth-child(1) > li:nth-child(8) > a:nth-child(1) > span:nth-child(2)");
+    var NotInteresting = By.CssSelector("tr.radio-inline:nth-child(1) > td:nth-child(1) > input:nth-child(1)");
+    var ApplyDeleting = By.CssSelector("button.btn:nth-child(1)");
+    var GetBackToTheSite = By.CssSelector(".btn-defaul > span:nth-child(1)");
+
+    //FaceBook Sign In
+    /*private readonly By FacebookAcc = By.CssSelector("span.button-labels:nth-child(1)");
+    private readonly By FacebookButton = By.CssSelector("p.btn-connect:nth-child(1)");*/
+
+    //Google Sign In
+    var GoogleAcc = By.CssSelector("span.button-labels:nth-child(1)");
+    var GooglebookButton = By.CssSelector("p.btn-connect:nth-child(2)");
+    var EnterGmail = By.CssSelector("#identifierId");
+
+    //Account info change
+    var accountName = By.CssSelector("span.button-labels:nth-child(1)");
+    var accountInfo = By.CssSelector(".onecolumn > ul:nth-child(1) > li:nth-child(5) > a:nth-child(1)");
+    var enterName = By.CssSelector("#firstname");
+    var enterLastname = By.CssSelector("#lastname");
+    var enterpasswd = By.CssSelector("#old_passwd");
+    var enterNewPasswd = By.CssSelector("#passwd");
+    var enterNewPasswdAgain = By.CssSelector("#confirmation");
+    var Save = By.CssSelector("button.btn:nth-child(1) > span:nth-child(1)");
     do
     {
         try
@@ -310,10 +367,99 @@ void Test_account(int testNumber)
         {
             using (IWebDriver driver = DriverSetup())
             {
+                //registration
+                driver.Navigate().GoToUrl("https://hgdft53.frog.ee/ru/");
+                var signIn = driver.FindElement(sighInButton);
+                signIn.Click();
 
-                //код сюда ролан <---
+                var register = driver.FindElement(registerButton);
+                register.Click();
+
+                var GenderRB = driver.FindElement(GenderRadiobutton);
+                GenderRB.Click();
+
+                var nameTB = driver.FindElement(nameTextBox);
+                nameTB.SendKeys("Test");
+
+                var lastnameTB = driver.FindElement(lastnameTextBox);
+                lastnameTB.SendKeys("Test");
+
+                var emailTB = driver.FindElement(emailTextBox);
+                emailTB.SendKeys("test@gmail.com");
+
+                var passwdTB = driver.FindElement(passwordTextBox);
+                passwdTB.SendKeys("Test123");
+
+                var selectDay = driver.FindElement(SelectBirthDay);
+                selectDay.SendKeys(rnd.Next(31).ToString());
+                if (SelectBirthDay == null)
+                {
+                    selectDay.SendKeys(rnd.Next(28).ToString());
+                }
+
+                var selectMonth = driver.FindElement(SelectBirthMonth);
+                selectMonth.SendKeys(months[rnd.Next(4)]);
+
+                var selectYear = driver.FindElement(SelectBirthYear);
+                selectYear.SendKeys(years[rnd.Next(6)]);
+
+                var sub = driver.FindElement(Subscribe);
+                sub.Click();
+
+                var apply = driver.FindElement(Apply);
+                apply.Click();
+
+                Thread.Sleep(2000);
+
+                //Change information
+
+                var name = driver.FindElement(accountName);
+                name.Click();
+
+                var info = driver.FindElement(accountInfo);
+                info.Click();
+
+                var nameEnter = driver.FindElement(enterName);
+                nameEnter.Clear();
+                nameEnter.SendKeys("Testing");
+
+                var lastnameEnter = driver.FindElement(enterLastname);
+                lastnameEnter.Clear();
+                lastnameEnter.SendKeys("Testimine");
+
+                var passwdEnter = driver.FindElement(enterpasswd);
+                passwdEnter.SendKeys("Test123");
+
+                var newpasswdEnter = driver.FindElement(enterNewPasswd);
+                newpasswdEnter.SendKeys("Test21");
+
+                var passwdagainEnter = driver.FindElement(enterNewPasswdAgain);
+                passwdagainEnter.SendKeys("Test21");
+
+                var save = driver.FindElement(Save);
+                save.Click();
+
+                Thread.Sleep(3000);
 
 
+                //Deleteing account
+
+                var acc = driver.FindElement(Account);
+                acc.Click();
+                Thread.Sleep(500);
+                var delAcc = driver.FindElement(DeleteAccount);
+                delAcc.Click();
+
+                var notIntr = driver.FindElement(NotInteresting);
+                notIntr.Click();
+
+                var applyDel = driver.FindElement(ApplyDeleting);
+                applyDel.Click();
+
+                var getBack = driver.FindElement(GetBackToTheSite);
+                getBack.Click();
+
+                Thread.Sleep(3000);
             }
         }
         catch (Exception e)
