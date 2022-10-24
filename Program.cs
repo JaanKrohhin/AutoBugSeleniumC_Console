@@ -34,7 +34,7 @@ void TestSite(string email, int testNumber,string filepath)
 {
     LogHelpers log = new LogHelpers(filepath);
     log.CreateLogFile(testNumber);
-    log.WriteToFile("Email for test: "+email);
+    log.WriteToFile("TestEmail: "+email);
     do
     {
         try
@@ -42,13 +42,12 @@ void TestSite(string email, int testNumber,string filepath)
             using (IWebDriver driver = DriverSetup())
             {
                 WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(30));
-
                 Login(driver, email);
-                Thread.Sleep(5000);
+                Thread.Sleep(3000);
                 PutItemToCartAndGoToCart(wait, driver);
-                Thread.Sleep(5000);
+                Thread.Sleep(3000);
                 AccountInfo(wait, driver);
-                Thread.Sleep(5000);
+                Thread.Sleep(3000);
                 ConfrimDelivery(wait, driver);
                 log.WriteToFile("Passed");
             }
@@ -56,7 +55,7 @@ void TestSite(string email, int testNumber,string filepath)
         catch (Exception e)
         {
             log.WriteToFile("Error "+e.ToString());
-            break;
+            log.WriteToFile("Restarting");
         }
     } while (LogHelpers.EndAllTests);
 }
