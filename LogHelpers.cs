@@ -29,6 +29,16 @@ namespace AutoBugSelenium
             stream.Flush();
         }
 
+        public void Info(string message)
+        {
+            stream.WriteLine("{0} {1} {2}", DateTime.Now.ToLongTimeString(), DateTime.Now.ToLongDateString(), "Info: "+message);
+            stream.Flush();
+        }
+        public void Error(string message)
+        {
+            stream.WriteLine("{0} {1} {2}", DateTime.Now.ToLongTimeString(), DateTime.Now.ToLongDateString(), "Error: "+message);
+            stream.Flush();
+        }
 
         //Static functions
         public static void CheckDirectoryExists()

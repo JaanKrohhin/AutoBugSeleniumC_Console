@@ -2,7 +2,9 @@
 using OpenQA.Selenium;
 using OpenQA.Selenium.Edge;
 using OpenQA.Selenium.Support.UI;
+using System;
 using System.Collections.Generic;
+using System.Threading;
 
 Console.WriteLine("Hello testers");
 LogHelpers.CheckDirectoryExists();
@@ -15,20 +17,23 @@ emails.ForEach(Console.WriteLine);
 Console.WriteLine("\nPress ENTER to start the program. Once started, press ENTER again to stop finish testing.\nThe program will close after it finishes the current tests");
 Console.ReadLine();
 int i = 1;
-foreach (var item in emails)
+Comparison(1);
+/*foreach (var item in emails)
 {
     try
     {
-        new Thread(() => TestSite(item, i++, filepath)).Start();
+        //new Thread(() => TestSite(item, i++, filepath)).Start();
+        // new Thread(() => Comparison(filepath)).Start();
     }
     catch (Exception e)
     {
         Console.WriteLine(e.Message);
     }
     
-}
+}*/
 Console.ReadLine();
 LogHelpers.EndAllTests = false;
+#region tests
 void TestSite(string email, int testNumber,string filepath)
 {
     LogHelpers log = new LogHelpers(filepath);
@@ -59,6 +64,104 @@ void TestSite(string email, int testNumber,string filepath)
     } while (LogHelpers.EndAllTests);
 }
 
+ void Comparison(int testNumber)
+{
+    using (IWebDriver dr = DriverSetup())
+    {
+        LogHelpers log = new LogHelpers(filepath);
+        log.CreateLogFile(testNumber);
+        List<string> items = new List<string>();
+        List<IWebElement> buttons = new List<IWebElement>();
+        List<string> comparing = new List<string>();
+        dr.Manage().Window.Maximize();
+        dr.Navigate().GoToUrl("https://hgdft53.frog.ee/en/1615/pc-components");
+        var products = dr.FindElements(By.ClassName("ajax_block_product"));
+        int count = 0;
+        foreach (var item in products)
+        {
+            if (count == 4)
+                break;
+            buttons.Add(item.FindElements(By.ClassName("add_to_compare"))[0]);
+            items.Add(item.FindElement(By.ClassName("product-name")).GetAttribute("title"));
+            count++;
+        }
+        int pressed = 0;
+        for (int i = 0; i < buttons.Count; i++)
+        {
+            if (pressed == 4)
+                break;
+            if (buttons[i].Displayed)
+            {
+                WebDriverWait wait = new WebDriverWait(dr, TimeSpan.FromSeconds(10));
+                buttons[i].Click();
+                pressed++;
+                wait.Until((d) =>
+                {
+                    if (dr.FindElements(By.CssSelector("a.add_to_compare.checked")).Count == pressed)
+                    {
+                        return dr;
+                    }
+                    return null;
+                });
+
+            }
+            dr.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(5);
+        }
+        new WebDriverWait(dr, TimeSpan.FromSeconds(10));
+        dr.FindElement(By.ClassName("bt_compare")).Click();
+        foreach (var item in dr.FindElements(By.ClassName("ajax_block_product")))
+        {
+            try
+            {
+                string itemName = item.FindElement(By.ClassName("product-name")).GetAttribute("title");
+                if (items.Contains(itemName))
+                {
+                    items.Remove(itemName);
+                }
+            }
+            catch (Exception e)
+            {
+                log.Error(e.Message);
+            }
+        }
+        if (pressed != 0)
+            log.Info("Successfully added to comparison");
+        //deleting
+        while(pressed != 0)
+        {
+            var item = dr.FindElement(By.ClassName("ajax_block_product"));
+            try
+            {
+                IWebElement deleteButton = item.FindElement(By.ClassName("cmp_remove"));
+                WebDriverWait wait = new WebDriverWait(dr, TimeSpan.FromSeconds(60));
+                if (deleteButton.Displayed)
+                {
+                    deleteButton.Click();
+                    pressed--;
+                    wait.Until((d) =>
+                    {
+                        if (dr.FindElements(By.ClassName("cmp_remove")).Count == pressed)
+                        {
+                            return dr;
+                        }
+                        return null;
+                    });
+                }
+            }
+            catch (StaleElementReferenceException ex)
+            {
+                item = dr.FindElement(By.ClassName("ajax_block_product"));
+            }
+            catch (Exception e)
+            {
+                log.Error(e.Message);
+            }
+        }
+        if (pressed == 0)
+            log.Info("Successfully deleted from comparison");
+    }
+}
+#endregion
 IWebDriver DriverSetup()
 {
     IWebDriver driver = new EdgeDriver();
