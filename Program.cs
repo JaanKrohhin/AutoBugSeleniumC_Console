@@ -1,6 +1,6 @@
 ﻿using AutoBugSelenium;
 using OpenQA.Selenium;
-using OpenQA.Selenium.Edge;
+using OpenQA.Selenium.Firefox;
 using OpenQA.Selenium.Support.UI;
 using SeleniumExtras.WaitHelpers;
 using System;
@@ -385,7 +385,7 @@ void Test_account(int testNumber, string email)
                 lastnameTB.SendKeys("Test");
 
                 var emailTB = driver.FindElement(emailTextBox);
-                emailTB.SendKeys("test@gmail.com");
+                emailTB.SendKeys(getEmail());
 
                 var passwdTB = driver.FindElement(passwordTextBox);
                 passwdTB.SendKeys("Test123");
@@ -412,7 +412,7 @@ void Test_account(int testNumber, string email)
                 Thread.Sleep(2000);
 
                 //Change information
-
+                driver.Navigate().GoToUrl("https://hgdft53.frog.ee/ru/");
                 var name = driver.FindElement(accountName);
                 name.Click();
 
@@ -443,6 +443,7 @@ void Test_account(int testNumber, string email)
 
 
                 //Deleteing account
+                driver.Navigate().GoToUrl("https://hgdft53.frog.ee/ru/");
 
                 var acc = driver.FindElement(Account);
                 acc.Click();
@@ -472,7 +473,7 @@ void Test_account(int testNumber, string email)
     #endregion
     IWebDriver DriverSetup()
 {
-    IWebDriver driver = new EdgeDriver();
+    IWebDriver driver = new FirefoxDriver();
     driver.Manage().Window.Maximize();
     driver.Url = "https://hgdft53.frog.ee";
     return driver;
@@ -553,4 +554,17 @@ List<string> GetEmails(int maxEmails)
         emails.Add("testReg" + i + "@superFakeMail.TestsJK");
     }
     return emails;
+}
+
+string getEmail()
+{
+    string email = string.Empty;
+    char[] letters = new char[] { 'a', 'b', 'c', 'd', 'g', 'h', 'k', 'l', 'o' };
+    Random rnd = new Random();
+    for (int i = 0; i < 12; i++)
+    {
+        email += letters[rnd.Next(0, letters.Length)];
+    }
+    email += $"@hail{rnd.Next(0, 100)}{rnd.Next(0, 100)}.com";
+    return email;
 }
