@@ -222,8 +222,9 @@ void TestSite(string email, int testNumber,string filepath)
 
 
             Thread.Sleep(300);
+                wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("/html/body/div[2]/div[2]/div/div/div[2]/div[2]/ul/li/div/div/div[2]/div[4]/ul/li/a")));
+                var item = driver.FindElement(By.XPath("/html/body/div[2]/div[2]/div/div/div[2]/div[2]/ul/li/div/div/div[2]/div[4]/ul/li/a"));
 
-            var item = driver.FindElement(By.XPath("/html/body/div[2]/div[2]/div/div/div[2]/div[2]/ul/li/div/div/div[2]/div[4]/ul/li/a"));
             item.Click();
             var cart = driver.FindElement(By.CssSelector(".justify_center"));
             Thread.Sleep(1500);
