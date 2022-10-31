@@ -52,6 +52,7 @@ for (int j = 0; j < things; j++)
                     new Thread(() => Test_account(i++, item)).Start();
                     break;
             }
+            Thread.Sleep(1000);
 
 
 
@@ -94,6 +95,7 @@ void TestSite(string email, int testNumber,string filepath)
             log.WriteToFile("Error "+e.ToString());
             log.WriteToFile("Restarting");
         }
+        Thread.Sleep(1000);
     } while (LogHelpers.EndAllTests);
 }
 
@@ -197,6 +199,7 @@ void TestSite(string email, int testNumber,string filepath)
                 log.Info("Successfully deleted from comparison");
             log.Info("End comparison testing " + testNumber);
         }
+        Thread.Sleep(1000);
     } while (LogHelpers.EndAllTests);
 }
  void Test_buy(int testNumber)
@@ -300,6 +303,7 @@ void TestSite(string email, int testNumber,string filepath)
         {
             log.WriteToFile("Error " + e.ToString());
         }
+        Thread.Sleep(1000);
     } while (LogHelpers.EndAllTests);
 
 
@@ -484,6 +488,8 @@ void Test_account(int testNumber, string email)
 {
     FirefoxOptions fv = new FirefoxOptions();
     fv.AddArgument("--disable-notifications");
+    //---------------------------------SERIOUS-------------------------------------------- totally just my pc bruh, uncomment if u get an error 
+    //fv.BrowserExecutableLocation = @"C:\Program Files\Mozilla Firefox\firefox.exe";
     IWebDriver driver = new FirefoxDriver(fv);
     driver.Manage().Window.Maximize();
     driver.Url = "https://hgdft53.frog.ee";
