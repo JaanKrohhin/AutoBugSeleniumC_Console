@@ -29,34 +29,35 @@ for (int j = 0; j < things; j++)
 {
     foreach (var item in emails)
     {
+        List<Thread> threads = new List<Thread>();
         try
         {
             switch (choose)
             {
                 case 1:
-                    new Thread(() => TestSite(item, i++, filepath)).Start();
+                    threads.Add(new Thread(() => TestSite(item, i++, filepath)));
                     break;
                 case 2:
-                    new Thread(() => Comparison(i++)).Start();
+                    threads.Add(new Thread(() => Comparison(i++)));
                     break;
                 case 3:
-                    new Thread(() => Test_buy(i++)).Start();
+                    threads.Add(new Thread(() => Test_buy(i++)));
                     break;
                 case 4:
-                    new Thread(() => Test_account(i++, item)).Start();
+                    threads.Add(new Thread(() => Test_account(i++, item)));
                     break;
                 case 5:
-                    new Thread(() => TestSite(item, i++, filepath)).Start();
-                    new Thread(() => Comparison(i++)).Start();
-                    new Thread(() => Test_buy(i++)).Start();
-                    new Thread(() => Test_account(i++, item)).Start();
+                    threads.Add(new Thread(() => TestSite(item, i++, filepath)));
+                    threads.Add(new Thread(() => Comparison(i++)));
+                    threads.Add(new Thread(() => Test_buy(i++)));
+                    threads.Add(new Thread(() => Test_account(i++, item)));
                     break;
             }
-            Thread.Sleep(1000);
-
-
-
-
+            foreach (Thread thread in threads)
+            {
+                thread.Start();
+                thread.Join(); //should be thinked about
+            }
         }
         catch (Exception e)
         {
@@ -489,7 +490,7 @@ void Test_account(int testNumber, string email)
     FirefoxOptions fv = new FirefoxOptions();
     fv.AddArgument("--disable-notifications");
     //---------------------------------SERIOUS-------------------------------------------- totally just my pc bruh, uncomment if u get an error 
-    //fv.BrowserExecutableLocation = @"C:\Program Files\Mozilla Firefox\firefox.exe";
+    fv.BrowserExecutableLocation = @"C:\Program Files\Mozilla Firefox\firefox.exe";
     IWebDriver driver = new FirefoxDriver(fv);
     driver.Manage().Window.Maximize();
     driver.Url = "https://hgdft53.frog.ee";
