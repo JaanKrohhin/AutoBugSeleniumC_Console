@@ -23,9 +23,9 @@ Console.ReadLine();
 int i = 1;
 for (int j = 0; j < things; j++)
 {
-    new Thread(() => Run(filepath, i + j)).Start();
+    new Thread(() => Run(filepath, i + j, j)).Start();
 }
- void Run(string filepath, int i)
+ void Run(string filepath, int i, int testNum)
 {
     foreach (var item in emails)
     {
