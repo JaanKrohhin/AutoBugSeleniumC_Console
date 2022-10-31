@@ -5,9 +5,15 @@ using System.Text;
 
 namespace AutoBugSelenium
 {
-    public class LogHelpers
+    public enum TestType
     {
-
+        Auth,
+        Buy,
+        Search,
+        Compare
+    }
+    public class LogHelpers
+    {   
         public StreamWriter? stream;
         public static bool EndAllTests = true;
         public string folderpath { get; set; }
@@ -16,10 +22,14 @@ namespace AutoBugSelenium
         {
             this.folderpath = folderpath;
         }
-
-        public void CreateLogFile(int i)
+        private string generateId(TestType type)
         {
-            filepath = folderpath + @"\Test" + i.ToString() + ".log";
+            Random rnd = new Random();
+            return $"{type}_{DateTime.Now.Ticks}-{rnd.Next(0, 2147483647)}";
+        }
+        public void CreateLogFile(int i, TestType testType)
+        {
+            filepath = folderpath + @"\Test" +generateId(testType)+ ".log";
             stream = File.AppendText(filepath);
         }
 
@@ -58,6 +68,5 @@ namespace AutoBugSelenium
             Directory.CreateDirectory(filePath);
             return filePath;
         }
-
     }
 }

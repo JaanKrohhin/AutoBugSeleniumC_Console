@@ -11,50 +11,58 @@ int choose = Convert.ToInt32(Console.ReadLine());
 
 Console.WriteLine("Hello testers");
 LogHelpers.CheckDirectoryExists();
-Console.WriteLine("How many test to launch?");
+//Console.WriteLine("How many test to launch?");
 string filepath = LogHelpers.CreateFolderForSession();
-int numberOfTests = GetNumberFromUser("Type in a number between 0 and 13");
+int numberOfTests = GetNumberFromUser("How many test do you want(0 to 13): ");
 List<string> emails = GetEmails(numberOfTests);
 Console.WriteLine("Your emails:");
 emails.ForEach(Console.WriteLine);
+int things = GetNumberFromUser("Please enter the amount of programm copies do you want to create: ",max:3);
 Console.WriteLine("\nPress ENTER to start the program. Once started, press ENTER again to stop finish testing.\nThe program will close after it finishes the current tests");
 Console.ReadLine();
 int i = 1;
-foreach (var item in emails)
+for (int j = 0; j < things; j++)
 {
-    try
+    new Thread(() => Run(filepath, i + j)).Start();
+}
+ void Run(string filepath, int i)
+{
+    foreach (var item in emails)
     {
-        switch (choose)
+        try
         {
-            case 1:
-                new Thread(() => TestSite(item, i++, filepath)).Start();
-                break;
-            case 2:
-                new Thread(() => Comparison(i++)).Start();
-                break;
-            case 3:
-                new Thread(() => Test_buy(i++)).Start();
-                break;           
-            case 4:
-                new Thread(() => Test_account(i++, item)).Start();
-                break;
-            case 5:
-                new Thread(() => TestSite(item, i++, filepath)).Start();
-                new Thread(() => Comparison(i++)).Start();
-                new Thread(() => Test_buy(i++)).Start();
-                new Thread(() => Test_account(i++, item)).Start();
-                break;
+            switch (choose)
+            {
+                case 1:
+                    new Thread(() => TestSite(item, i++, filepath)).Start();
+                    break;
+                case 2:
+                    new Thread(() => Comparison(i++)).Start();
+                    break;
+                case 3:
+                    new Thread(() => Test_buy(i++)).Start();
+                    break;
+                case 4:
+                    new Thread(() => Test_account(i++, item)).Start();
+                    break;
+                case 5:
+                    new Thread(() => TestSite(item, i++, filepath)).Start();
+                    new Thread(() => Comparison(i++)).Start();
+                    new Thread(() => Test_buy(i++)).Start();
+                    new Thread(() => Test_account(i++, item)).Start();
+                    break;
+            }
+
+
+
+
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
         }
 
-  
-
-
     }
-    catch (Exception e)
-    {
-        Console.WriteLine(e.Message);
-    }
-    
 }
 Console.ReadLine();
 LogHelpers.EndAllTests = false;
@@ -62,7 +70,7 @@ LogHelpers.EndAllTests = false;
 void TestSite(string email, int testNumber,string filepath)
 {
     LogHelpers log = new LogHelpers(filepath);
-    log.CreateLogFile(testNumber);
+    log.CreateLogFile(testNumber, TestType.Buy);
     log.WriteToFile("TestEmail: "+email);
     do
     {
@@ -96,7 +104,7 @@ void TestSite(string email, int testNumber,string filepath)
         using (IWebDriver dr = DriverSetup())
         {
             LogHelpers log = new LogHelpers(filepath);
-            log.CreateLogFile(testNumber);
+            log.CreateLogFile(testNumber, TestType.Compare);
             log.Info("Start comparison testing, test number: " + testNumber);
             List<string> items = new List<string>();
             List<IWebElement> buttons = new List<IWebElement>();
@@ -194,7 +202,7 @@ void TestSite(string email, int testNumber,string filepath)
  void Test_buy(int testNumber)
 {
     LogHelpers log = new LogHelpers(filepath);
-    log.CreateLogFile(testNumber);
+    log.CreateLogFile(testNumber, TestType.Search);
     log.Info("Start Search and Buy testing, test number: " + testNumber);
 
 
@@ -299,7 +307,7 @@ void TestSite(string email, int testNumber,string filepath)
 void Test_account(int testNumber, string email)
 {
     LogHelpers log = new LogHelpers(filepath);
-    log.CreateLogFile(testNumber);
+    log.CreateLogFile(testNumber, TestType.Auth);
     log.Info("Start Account testing, test number: " + testNumber);
     List<string> months = new List<string>()
                 {
@@ -473,7 +481,9 @@ void Test_account(int testNumber, string email)
     #endregion
     IWebDriver DriverSetup()
 {
-    IWebDriver driver = new FirefoxDriver();
+    FirefoxOptions fv = new FirefoxOptions();
+    fv.AddArgument("--disable-notifications");
+    IWebDriver driver = new FirefoxDriver(fv);
     driver.Manage().Window.Maximize();
     driver.Url = "https://hgdft53.frog.ee";
     return driver;
